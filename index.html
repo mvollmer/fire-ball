@@ -1,0 +1,110 @@
+<html>
+  <body>
+    <h1>Laava Kuula</h1>
+    <canvas id="fireball" width="1000" height="500">
+    </canvas>
+    <br/>
+    <button id="start" onClick="init()">Start</button>
+    <style>
+      canvas {
+          border: 1px solid black;
+      }
+      button {
+          font-size: 40px;
+      }
+    </style>
+    <script>
+      let kuulat = [ ];
+
+      let kori = {
+          x: 500,
+          y: 500 - 20,
+      };
+
+      let game_over, win, started;
+
+      function init() {
+          kuulat = [
+              {
+                  x: 500,
+                  y: 0,
+              },
+              {
+                  x: 200,
+                  y: -200,
+              },
+              {
+                  x: 600,
+                  y: -450,
+              }
+          ];
+
+          game_over = false;
+          win = false;
+          started = true;
+          document.getElementById("start").textContent = "Restart";
+      }
+
+      function draw() {
+          const canvas = document.getElementById("fireball");
+          const c = canvas.getContext("2d");
+          c.clearRect(0, 0, 1000, 500);
+
+          function piirta_kuula(x, y) {
+              const r = 25;
+              c.fillStyle = "red";
+              c.beginPath();
+              c.arc(x, y, r, 0, 2*Math.PI);
+              c.fill()
+          }
+
+          function piirta_kori(x, y) {
+              c.fillStyle = "brown";
+              c.fillRect(x - 100/2, y, 100, 10);
+          }
+
+          for (const k of kuulat) {
+              if (!k.sain)
+                  piirta_kuula(k.x, k.y);
+          }
+
+          piirta_kori(kori.x, kori.y);
+
+          if (game_over) {
+              c.font = "48px serif";
+              c.fillStyle = "black";
+              c.fillText("GAME OVER!", 500 - 150, 250)
+          }
+
+          if (win) {
+              c.font = "64px serif";
+              c.fillStyle = "green";
+              c.fillText("WIN!", 500 - 50, 250)
+          }
+      }
+
+      function step() {
+          for (const k of kuulat) {
+              if (k.y + 25 > kori.y && k.x >= kori.x - 50 && k.x < kori.x + 50)
+                  k.sain = true;
+              else if (k.y < 500-25)
+                  k.y = k.y + 1;
+              else if (!k.sain)
+                  game_over = true;
+          }
+
+          kuulat = kuulat.filter(k => !k.sain);
+          if (kuulat.length == 0 && !game_over && started)
+              win = true;
+
+          draw();
+      }
+
+      window.setInterval(step, 10);
+      window.addEventListener("load", draw);
+      window.addEventListener("mousemove", (event) => {
+          kori.x = event.clientX;
+      });
+    </script>
+  </body>
+</html>
